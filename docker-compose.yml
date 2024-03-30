@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT}:3000"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - REDIS_ADD=${REDIS_ADD}
+      - REDIS_PASS=${REDIS_PASS}
+      - REDIS_DB=${REDIS_DB}
+    depends_on:
+      - db
+      - redis
+  db:
+    image: postgres
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+  redis:
+    image: redis
+    ports:
+      - "${REDIS_ADD}:6379"
