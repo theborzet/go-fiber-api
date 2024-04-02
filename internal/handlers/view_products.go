@@ -2,14 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
-	"go-fiber-api-docker/pkg/common/models"
+	"go-fiber-api-docker/internal/db/models"
 	"go-fiber-api-docker/pkg/common/redis"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func (h handler) GetAllProduct(c *fiber.Ctx) error {
+func (h Handler) GetAllProduct(c *fiber.Ctx) error {
 	keys, err := redis.RedisClient.Keys("product:*").Result()
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound)
@@ -31,10 +31,11 @@ func (h handler) GetAllProduct(c *fiber.Ctx) error {
 
 	}
 	if len(products) == 0 {
-		if result := h.DB.Find(&products); result.Error != nil {
-			return fiber.NewError(fiber.StatusNotFound, result.Error.Error())
+		results, err := h.repo.GetAllProduct()
+		if err != nil {
+			return fiber.NewError(fiber.StatusNotFound, err.Error())
 		}
-		for _, product := range products {
+		for _, product := range results {
 			productJSON, err := json.Marshal(product)
 			if err != nil {
 				continue
@@ -43,6 +44,7 @@ func (h handler) GetAllProduct(c *fiber.Ctx) error {
 				continue
 			}
 		}
+		return c.Status(fiber.StatusOK).JSON(&results)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(&products)

@@ -1,10 +1,10 @@
 package main
 
 import (
+	db "go-fiber-api-docker/internal/db/init"
+	"go-fiber-api-docker/internal/handlers"
 	"go-fiber-api-docker/pkg/common/config"
-	"go-fiber-api-docker/pkg/common/db"
 	"go-fiber-api-docker/pkg/common/redis"
-	"go-fiber-api-docker/pkg/handlers"
 	"log"
 
 	"github.com/gofiber/fiber/v2"

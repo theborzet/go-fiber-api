@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
-	"go-fiber-api-docker/pkg/common/models"
+	"go-fiber-api-docker/internal/db/models"
 	"go-fiber-api-docker/pkg/common/redis"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func (h handler) GetProduct(c *fiber.Ctx) error {
+func (h Handler) GetProduct(c *fiber.Ctx) error {
 	id := c.Params("id")
 	cachedJSON, err := redis.RedisClient.Get("product:" + id).Result()
 	if err == nil {
@@ -20,10 +21,13 @@ func (h handler) GetProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(&cachedProduct)
 	}
 
-	var product models.Product
+	var product *models.Product
 
-	if result := h.DB.First(&product, id); result.Error != nil {
-		return fiber.NewError(fiber.StatusNotFound, result.Error.Error())
+	productId, _ := strconv.Atoi(id)
+
+	product, err = h.repo.GetProductID(productId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
 
 	//Преобразуем продукт в JSON
