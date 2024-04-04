@@ -7,11 +7,13 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// type Repository interface {
-// 	GetProductID(id int) (*models.Product, error)
-// 	GetAllProduct() ([]*models.Product, error)
-// 	UpdateProduct(id int, updated *models.Product) error
-// }
+type Repository interface {
+	GetProductID(id int) (*models.Product, error)
+	GetAllProduct() ([]*models.Product, error)
+	UpdateProduct(id int, updated *models.Product) error
+	DeleteProduct(id int) error
+	AddProduct(product *models.Product) error
+}
 
 type SQLRepository struct {
 	db *sqlx.DB
