@@ -27,8 +27,19 @@ func (h Handler) AddProduct(c *fiber.Ctx) error {
 		Stock:       body.Stock,
 	}
 
-	if err := h.repo.AddProduct(&product); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	errchan := make(chan error)
+	go func() {
+		err := h.repo.AddProduct(&product)
+		if err != nil {
+			errchan <- fiber.NewError(fiber.StatusBadRequest, err.Error())
+		} else {
+			errchan <- nil
+		}
+	}()
+
+	err := <-errchan
+	if err != nil {
+		return err
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(&product)

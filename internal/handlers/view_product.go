@@ -25,10 +25,16 @@ func (h Handler) GetProduct(c *fiber.Ctx) error {
 
 	productId, _ := strconv.Atoi(id)
 
-	product, err = h.repo.GetProductID(productId)
-	if err != nil {
-		return fiber.NewError(fiber.StatusNotFound, err.Error())
-	}
+	errchan := make(chan error)
+
+	go func() {
+		product, err = h.repo.GetProductID(productId)
+		if err != nil {
+			errchan <- fiber.NewError(fiber.StatusNotFound, err.Error())
+		} else {
+			errchan <- nil
+		}
+	}()
 
 	//Преобразуем продукт в JSON
 	productJSON, err := json.Marshal(product)

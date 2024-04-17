@@ -12,8 +12,20 @@ func (h Handler) DeleteProduct(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if err := h.repo.DeleteProduct(productId); err != nil {
-		return fiber.NewError(fiber.StatusNotFound, err.Error())
+	errchan := make(chan error)
+	go func() {
+		err := h.repo.DeleteProduct(productId)
+		if err != nil {
+			errchan <- fiber.NewError(fiber.StatusNotFound, err.Error())
+		} else {
+			errchan <- nil
+		}
+	}()
+
+	err = <-errchan
+	if err != nil {
+		return err
 	}
+
 	return c.SendStatus(fiber.StatusOK)
 }
